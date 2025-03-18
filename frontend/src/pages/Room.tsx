@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -15,6 +15,8 @@ import {
 import axios from 'axios';
 import io from 'socket.io-client';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 interface Player {
   username: string;
   isModerator: boolean;
@@ -23,14 +25,19 @@ interface Player {
 
 const Room: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
+  const location = useLocation();
   const [players, setPlayers] = useState<Player[]>([]);
   const [celebrity, setCelebrity] = useState('');
   const [gameStarted, setGameStarted] = useState(false);
   const [celebrities, setCelebrities] = useState<string[]>([]);
+  const [username] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('username') || '';
+  });
   const toast = useToast();
   
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socket = io(API_BASE_URL);
     
     socket.emit('joinRoom', roomId);
     
@@ -53,7 +60,7 @@ const Room: React.FC = () => {
   
   const startGame = async () => {
     try {
-      await axios.post(`/api/rooms/${roomId}/start`);
+      await axios.post(`${API_BASE_URL}/api/rooms/${roomId}/start`);
     } catch (error) {
       toast({
         title: 'Error',
@@ -76,8 +83,18 @@ const Room: React.FC = () => {
         return;
       }
       
-      await axios.post(`/api/rooms/${roomId}/celebrity`, { celebrity });
+      await axios.post(`${API_BASE_URL}/api/rooms/${roomId}/celebrity`, { 
+        celebrity,
+        username 
+      });
       setCelebrity('');
+      
+      toast({
+        title: 'Success',
+        description: 'Celebrity submitted successfully',
+        status: 'success',
+        duration: 3000,
+      });
     } catch (error) {
       toast({
         title: 'Error',
@@ -111,7 +128,7 @@ const Room: React.FC = () => {
               </Button>
             )}
             
-            {gameStarted && celebrities.length === 0 && (
+            {gameStarted && celebrities.length === 0 && !players.find(p => p.username === username)?.hasSubmittedCelebrity && (
               <>
                 <Input
                   placeholder="Enter a celebrity name"
