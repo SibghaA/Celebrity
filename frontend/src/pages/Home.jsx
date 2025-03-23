@@ -14,7 +14,7 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const Home: React.FC = () => {
+const Home = () => {
   const [roomCode, setRoomCode] = useState('');
   const [username, setUsername] = useState('');
   const navigate = useNavigate();

@@ -17,19 +17,13 @@ import io from 'socket.io-client';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-interface Player {
-  username: string;
-  isModerator: boolean;
-  hasSubmittedCelebrity: boolean;
-}
-
-const Room: React.FC = () => {
-  const { roomId } = useParams<{ roomId: string }>();
+const Room = () => {
+  const { roomId } = useParams();
   const location = useLocation();
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState([]);
   const [celebrity, setCelebrity] = useState('');
   const [gameStarted, setGameStarted] = useState(false);
-  const [celebrities, setCelebrities] = useState<string[]>([]);
+  const [celebrities, setCelebrities] = useState([]);
   const [username] = useState(() => {
     const params = new URLSearchParams(location.search);
     return params.get('username') || '';
@@ -41,7 +35,7 @@ const Room: React.FC = () => {
     
     socket.emit('joinRoom', roomId);
     
-    socket.on('playerJoined', (updatedPlayers: Player[]) => {
+    socket.on('playerJoined', (updatedPlayers) => {
       setPlayers(updatedPlayers);
     });
     
@@ -49,7 +43,7 @@ const Room: React.FC = () => {
       setGameStarted(true);
     });
     
-    socket.on('allCelebritiesSubmitted', (allCelebrities: string[]) => {
+    socket.on('allCelebritiesSubmitted', (allCelebrities) => {
       setCelebrities(allCelebrities);
     });
     

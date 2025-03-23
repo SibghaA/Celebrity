@@ -4,7 +4,7 @@ import { Box } from '@chakra-ui/react';
 import Home from './pages/Home';
 import Room from './pages/Room';
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <Box minH="100vh" bg="gray.50">
       <Routes>
