@@ -15,8 +15,6 @@ import {
 import axios from 'axios';
 import io from 'socket.io-client';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const Room = () => {
   const { roomId } = useParams();
   const location = useLocation();
@@ -31,7 +29,9 @@ const Room = () => {
   const toast = useToast();
   
   useEffect(() => {
-    const socket = io(API_BASE_URL);
+    const socket = io({
+      path: '/socket.io'
+    });
     
     socket.emit('joinRoom', roomId);
     
@@ -54,7 +54,7 @@ const Room = () => {
   
   const startGame = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/rooms/${roomId}/start`);
+      await axios.post(`/api/rooms/${roomId}/start`);
     } catch (error) {
       toast({
         title: 'Error',
@@ -77,7 +77,7 @@ const Room = () => {
         return;
       }
       
-      await axios.post(`${API_BASE_URL}/api/rooms/${roomId}/celebrity`, { 
+      await axios.post(`/api/rooms/${roomId}/celebrity`, { 
         celebrity,
         username 
       });

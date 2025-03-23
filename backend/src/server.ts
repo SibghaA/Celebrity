@@ -2,7 +2,6 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import { Room } from './models/Room.js';
 import { generateRoomCode } from './utils/roomCode.js';
@@ -11,18 +10,8 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
-});
+const io = new Server(httpServer);
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI!)
@@ -135,7 +124,7 @@ app.post('/api/rooms/:roomId/celebrity', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 }); 

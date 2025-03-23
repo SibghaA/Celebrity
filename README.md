@@ -27,7 +27,7 @@ A web-based implementation of the Celebrity game where players can create rooms,
    - Add the following variables:
      ```
      MONGODB_URI=mongodb://localhost:27017/celebrity-game
-     PORT=5000
+     PORT=8000
      ```
 
 ## Running the Application

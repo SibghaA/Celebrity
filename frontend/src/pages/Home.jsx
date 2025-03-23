@@ -12,8 +12,6 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 const Home = () => {
   const [roomCode, setRoomCode] = useState('');
   const [username, setUsername] = useState('');
@@ -32,7 +30,7 @@ const Home = () => {
         return;
       }
       
-      const response = await axios.post(`${API_BASE_URL}/api/rooms/create`, { username });
+      const response = await axios.post('/api/rooms/create', { username });
       navigate(`/room/${response.data.roomCode}?username=${encodeURIComponent(username)}`);
     } catch (error) {
       toast({
@@ -56,7 +54,7 @@ const Home = () => {
         return;
       }
 
-      await axios.post(`${API_BASE_URL}/api/rooms/${roomCode}/join`, { username });
+      await axios.post(`/api/rooms/${roomCode}/join`, { username });
       navigate(`/room/${roomCode}?username=${encodeURIComponent(username)}`);
     } catch (error) {
       toast({
