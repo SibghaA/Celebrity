@@ -18,10 +18,14 @@ Deployed Application: http://3.140.228.98/
 ```
 CELEBRITY/
 ├── backend/
+│   ├── dist/
 │   ├── node_modules/
 │   ├── src/
 │   │   ├── models/
+│   │   ├── types/
+│   │   │   └── room.ts
 │   │   ├── utils/
+│   │   │   └── roomCode.ts
 │   │   └── server.ts
 │   ├── .env
 │   ├── .eslintrc.json
@@ -49,22 +53,26 @@ CELEBRITY/
 │   └── vite.config.js
 ├── .gitignore
 ├── CelebrityScreenshot.png
+├── LICENSE
 └── README.md
 ```
 
 ## Architecture Overview
 
-The project follows a standard client-server architecture with separate frontend and backend directories:
+The project follows a modern full-stack architecture with separate frontend and backend components:
 
 ### Backend
-- **Node.js** server with TypeScript support
-- Organized into models and utility functions
-- Configuration via environment variables (.env)
+- **Node.js** TypeScript server 
+- Custom type definitions in `types/room.ts`
+- Utility functions for room management in `utils/roomCode.ts`
+- TypeScript configuration with `tsconfig.json`
+- Compiled output stored in the `dist` directory
 
 ### Frontend
-- **React** application built with Vite
+- **React** application built with **Vite**
 - JSX components with TypeScript support
-- Environment-specific configurations
+- Environment-specific configurations (.env files)
+- Built with modern tooling (ESLint, Prettier)
 
 ## Setup
 
