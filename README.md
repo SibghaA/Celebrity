@@ -134,5 +134,8 @@ The project follows a standard client-server architecture with separate frontend
   - Node.js
   - Express
   - TypeScript
-  - MongoDB with Mongoose
-  - Socket.IO 
+  - MongoDB 
+  - Socket.IO
+  
+## License
+This project is licensed under the MIT License - see the LICENSE.md file for details.

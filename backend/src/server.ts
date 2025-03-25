@@ -1,29 +1,40 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import mongoose from 'mongoose';
+import { MongoClient, Db } from 'mongodb';
 import dotenv from 'dotenv';
-import { Room } from './models/Room.js';
 import { generateRoomCode } from './utils/roomCode.js';
+import { Room, Player } from './types/room.js';
 
 dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
+const client = new MongoClient(process.env.MONGODB_URI!);
+let db: Db;
 
 app.use(express.json());
 
-mongoose
-  .connect(process.env.MONGODB_URI!)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Connect to MongoDB
+async function connectToMongo() {
+  try {
+    await client.connect();
+    db = client.db('celebrity-game');
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  }
+}
+
+connectToMongo();
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   socket.on('joinRoom', async (roomId) => {
     socket.join(roomId);
-    const room = await Room.findOne({ roomCode: roomId });
+    const room = await db.collection('rooms').findOne({ roomCode: roomId });
     if (room) {
       io.to(roomId).emit('playerJoined', room.players);
     }
@@ -36,12 +47,14 @@ app.post('/api/rooms/create', async (req, res) => {
     const { username } = req.body;
     const roomCode = generateRoomCode();
 
-    const room = new Room({
+    const room: Room = {
       roomCode,
-      players: [{ username, isModerator: true }],
-    });
+      isGameStarted: false,
+      players: [{ username, isModerator: true, hasSubmittedCelebrity: false }],
+      celebrities: []
+    };
 
-    await room.save();
+    await db.collection('rooms').insertOne(room);
     res.json({ roomCode });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create room' });
@@ -53,7 +66,7 @@ app.post('/api/rooms/:roomId/join', async (req, res) => {
     const { roomId } = req.params;
     const { username } = req.body;
 
-    const room = await Room.findOne({ roomCode: roomId });
+    const room = await db.collection('rooms').findOne({ roomCode: roomId });
     if (!room) {
       return res.status(404).json({ error: 'Room not found' });
     }
@@ -62,10 +75,18 @@ app.post('/api/rooms/:roomId/join', async (req, res) => {
       return res.status(400).json({ error: 'Game has already started' });
     }
 
-    room.players.push({ username, isModerator: false });
-    await room.save();
+    const newPlayer: Player = { username, isModerator: false, hasSubmittedCelebrity: false };
+    await db.collection('rooms').updateOne(
+      { roomCode: roomId },
+      { $push: { players: newPlayer as any } }
+    );
 
-    io.to(roomId).emit('playerJoined', room.players);
+    const updatedRoom = await db.collection('rooms').findOne({ roomCode: roomId });
+    if (!updatedRoom) {
+      return res.status(500).json({ error: 'Failed to update room' });
+    }
+    
+    io.to(roomId).emit('playerJoined', updatedRoom.players);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to join room' });
@@ -76,13 +97,14 @@ app.post('/api/rooms/:roomId/start', async (req, res) => {
   try {
     const { roomId } = req.params;
 
-    const room = await Room.findOne({ roomCode: roomId });
-    if (!room) {
+    const result = await db.collection('rooms').updateOne(
+      { roomCode: roomId },
+      { $set: { isGameStarted: true } }
+    );
+
+    if (result.matchedCount === 0) {
       return res.status(404).json({ error: 'Room not found' });
     }
-
-    room.isGameStarted = true;
-    await room.save();
 
     io.to(roomId).emit('gameStarted');
     res.json({ success: true });
@@ -96,25 +118,30 @@ app.post('/api/rooms/:roomId/celebrity', async (req, res) => {
     const { roomId } = req.params;
     const { celebrity, username } = req.body;
 
-    const room = await Room.findOne({ roomCode: roomId });
+    const room = await db.collection('rooms').findOne({ roomCode: roomId });
     if (!room) {
       return res.status(404).json({ error: 'Room not found' });
     }
 
-    const player = room.players.find((p) => p.username === username);
+    const player = room.players.find((p: Player) => p.username === username);
     if (player) {
       player.hasSubmittedCelebrity = true;
       player.celebrity = celebrity;
     }
 
-    await room.save();
+    await db.collection('rooms').updateOne(
+      { roomCode: roomId },
+      { $set: { players: room.players } }
+    );
 
     // Check if all players have submitted
-    const allSubmitted = room.players.every((p) => p.hasSubmittedCelebrity);
+    const allSubmitted = room.players.every((p: Player) => p.hasSubmittedCelebrity);
     if (allSubmitted) {
-      const celebrities = room.players.map((p) => p.celebrity!).sort(() => Math.random() - 0.5);
-      room.celebrities = celebrities;
-      await room.save();
+      const celebrities = room.players.map((p: Player) => p.celebrity!).sort(() => Math.random() - 0.5);
+      await db.collection('rooms').updateOne(
+        { roomCode: roomId },
+        { $set: { celebrities: celebrities } }
+      );
       io.to(roomId).emit('allCelebritiesSubmitted', celebrities);
     }
 
@@ -122,6 +149,17 @@ app.post('/api/rooms/:roomId/celebrity', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to submit celebrity' });
+  }
+});
+
+// Cleanup on server shutdown
+process.on('SIGINT', async () => {
+  try {
+    await client.close();
+    process.exit(0);
+  } catch (error) {
+    console.error('Error during cleanup:', error);
+    process.exit(1);
   }
 });
 
