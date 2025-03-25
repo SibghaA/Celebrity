@@ -14,4 +14,4 @@ const roomSchema = new mongoose.Schema({
   celebrities: [{ type: String }],
 });
 
-export const Room = mongoose.model('Room', roomSchema); 
+export const Room = mongoose.model('Room', roomSchema);
