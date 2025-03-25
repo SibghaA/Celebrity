@@ -7,7 +7,7 @@
 Sibgha Ahmad
 
 ## Useful Links
-* Video demo: 
+* Video demo: https://youtu.be/l6tIImufIAA
 * Slides: https://docs.google.com/presentation/d/1yajsFIgxmoiooYI_mCcvdq3o4GG3MdQZ9-VVg4t0OBM/edit#slide=id.g32826e2c885_0_67
 * Design Document: https://docs.google.com/document/d/1FmdwVxQvugul5ilbhRcgqyJbeDzh7CTB3hkGtt9qKXE/edit?tab=t.0
 * Deployed Application: http://3.140.228.98/
