@@ -1,12 +1,70 @@
 # Celebrity Game
 
-A web-based implementation of the Celebrity game where players can create rooms, join existing rooms, and play together.
+"Celebrity" is an interactive web-based party game where players submit celebrity names anonymously and then try to match other players to their submitted celebrities. The game combines elements of social deduction, memory, and interpersonal knowledge to create an engaging multiplayer experience that can be played in classroom settings, parties, or virtual gatherings.
 
-## Prerequisites
+## Author
 
-- Node.js (v16 or higher)
-- MongoDB (running locally or a remote instance)
-- npm or yarn
+Sibgha Ahmad
+
+## Useful Links
+Video demo: 
+Slides: https://docs.google.com/presentation/d/1yajsFIgxmoiooYI_mCcvdq3o4GG3MdQZ9-VVg4t0OBM/edit#slide=id.g32826e2c885_0_67
+Design Document: https://docs.google.com/document/d/1FmdwVxQvugul5ilbhRcgqyJbeDzh7CTB3hkGtt9qKXE/edit?tab=t.0
+Deployed Application: http://3.140.228.98/
+
+
+# Project Structure
+
+```
+CELEBRITY/
+├── backend/
+│   ├── node_modules/
+│   ├── src/
+│   │   ├── models/
+│   │   ├── utils/
+│   │   └── server.ts
+│   ├── .env
+│   ├── .eslintrc.json
+│   ├── .prettierrc
+│   ├── package-lock.json
+│   ├── package.json
+│   └── tsconfig.json
+├── frontend/
+│   ├── node_modules/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── App.jsx
+│   │   ├── env.d.ts
+│   │   └── main.jsx
+│   ├── .env
+│   ├── .env.production
+│   ├── .eslintrc.json
+│   ├── .gitignore
+│   ├── .prettierrc
+│   ├── index.html
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.js
+├── .gitignore
+├── CelebrityScreenshot.png
+└── README.md
+```
+
+## Architecture Overview
+
+The project follows a standard client-server architecture with separate frontend and backend directories:
+
+### Backend
+- **Node.js** server with TypeScript support
+- Organized into models and utility functions
+- Configuration via environment variables (.env)
+
+### Frontend
+- **React** application built with Vite
+- JSX components with TypeScript support
+- Environment-specific configurations
 
 ## Setup
 
@@ -35,7 +93,7 @@ A web-based implementation of the Celebrity game where players can create rooms,
 1. Start the backend server:
    ```bash
    cd backend
-   npm run dev
+   npm start
    ```
 
 2. In a new terminal, start the frontend development server:
