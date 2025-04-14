@@ -11,6 +11,8 @@ import {
   List,
   ListItem,
   useToast,
+  HStack,
+  Icon,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -100,53 +102,92 @@ const Room = () => {
   };
   
   return (
-    <Container maxW="container.sm" py={10}>
-      <VStack spacing={8}>
-        <Heading>Room: {roomId}</Heading>
+    <Container maxW="container.lg" py={10}>
+      <VStack spacing={6} bg="white" p={8} borderRadius="xl" boxShadow="lg">
+        <Heading color="brand.accent2">Room Code: {roomId}</Heading>
+        <Text fontSize="lg" color="brand.accent2">
+          Welcome, {username}!
+        </Text>
         
-        <Box w="100%" p={6} borderRadius="lg" borderWidth={1} bg="white">
-          <VStack spacing={4}>
-            <Text fontWeight="bold">Players:</Text>
-            <List spacing={2} w="100%">
-              {players.map((player) => (
-                <ListItem key={player.username}>
-                  {player.username} {player.isModerator ? '(Moderator)' : ''} 
-                  {player.hasSubmittedCelebrity ? '✓' : ''}
+        <List spacing={3} w="full">
+          <Heading size="md" color="brand.accent2" mb={2}>
+            Players:
+          </Heading>
+          {players.map((player, index) => (
+            <ListItem
+              key={index}
+              p={3}
+              bg="#f6bd60"
+              borderRadius="md"
+              color="white"
+            >
+              <HStack justify="space-between">
+                <Text>
+                  {player.username} {player.isModerator && "(Moderator)"}
+                </Text>
+                {player.hasSubmittedCelebrity && (
+                  <Text fontSize="lg" color="green.500">✓</Text>
+                )}
+              </HStack>
+            </ListItem>
+          ))}
+        </List>
+
+        {!gameStarted && players.some(p => p.isModerator) && (
+          <Button
+            onClick={startGame}
+            bg="brand.accent1"
+            color="white"
+            _hover={{ bg: 'brand.accent3' }}
+            w="full"
+          >
+            Start Game
+          </Button>
+        )}
+
+        {gameStarted && !players.find(p => p.username === username)?.hasSubmittedCelebrity && (
+          <VStack w="full" spacing={4}>
+            <Input
+              placeholder="Enter a celebrity name"
+              value={celebrity}
+              onChange={(e) => setCelebrity(e.target.value)}
+              bg="white"
+              borderColor="brand.accent1"
+              _hover={{ borderColor: 'brand.accent3' }}
+            />
+            <Button
+              onClick={submitCelebrity}
+              bg="brand.accent1"
+              color="white"
+              _hover={{ bg: 'brand.accent3' }}
+              w="full"
+            >
+              Submit Celebrity
+            </Button>
+          </VStack>
+        )}
+
+        {celebrities.length > 0 && (
+          <VStack w="full" spacing={4}>
+            <Heading size="md" color="brand.accent2">
+              Celebrities to Guess:
+            </Heading>
+            <List spacing={3} w="full">
+              {celebrities.map((celeb, index) => (
+                <ListItem
+                  key={index}
+                  p={3}
+                  bg="white"
+                  borderRadius="md"
+                  border="1px"
+                  borderColor="gray.200"
+                >
+                  {celeb}
                 </ListItem>
               ))}
             </List>
-            
-            {!gameStarted && players.some(p => p.isModerator) && (
-              <Button colorScheme="blue" onClick={startGame} w="100%">
-                Start Game
-              </Button>
-            )}
-            
-            {gameStarted && celebrities.length === 0 && !players.find(p => p.username === username)?.hasSubmittedCelebrity && (
-              <>
-                <Input
-                  placeholder="Enter a celebrity name"
-                  value={celebrity}
-                  onChange={(e) => setCelebrity(e.target.value)}
-                />
-                <Button colorScheme="green" onClick={submitCelebrity} w="100%">
-                  Submit Celebrity
-                </Button>
-              </>
-            )}
-            
-            {celebrities.length > 0 && (
-              <>
-                <Text fontWeight="bold">Celebrity List:</Text>
-                <List spacing={2} w="100%">
-                  {celebrities.map((celeb, index) => (
-                    <ListItem key={index}>{celeb}</ListItem>
-                  ))}
-                </List>
-              </>
-            )}
           </VStack>
-        </Box>
+        )}
       </VStack>
     </Container>
   );
