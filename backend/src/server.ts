@@ -51,7 +51,7 @@ app.post('/api/rooms/create', async (req, res) => {
       roomCode,
       isGameStarted: false,
       players: [{ username, isModerator: true, hasSubmittedCelebrity: false }],
-      celebrities: []
+      celebrities: [],
     };
 
     await db.collection('rooms').insertOne(room);
@@ -76,16 +76,15 @@ app.post('/api/rooms/:roomId/join', async (req, res) => {
     }
 
     const newPlayer: Player = { username, isModerator: false, hasSubmittedCelebrity: false };
-    await db.collection('rooms').updateOne(
-      { roomCode: roomId },
-      { $push: { players: newPlayer as any } }
-    );
+    await db
+      .collection('rooms')
+      .updateOne({ roomCode: roomId }, { $push: { players: newPlayer as any } });
 
     const updatedRoom = await db.collection('rooms').findOne({ roomCode: roomId });
     if (!updatedRoom) {
       return res.status(500).json({ error: 'Failed to update room' });
     }
-    
+
     io.to(roomId).emit('playerJoined', updatedRoom.players);
     res.json({ success: true });
   } catch (error) {
@@ -97,10 +96,9 @@ app.post('/api/rooms/:roomId/start', async (req, res) => {
   try {
     const { roomId } = req.params;
 
-    const result = await db.collection('rooms').updateOne(
-      { roomCode: roomId },
-      { $set: { isGameStarted: true } }
-    );
+    const result = await db
+      .collection('rooms')
+      .updateOne({ roomCode: roomId }, { $set: { isGameStarted: true } });
 
     if (result.matchedCount === 0) {
       return res.status(404).json({ error: 'Room not found' });
@@ -129,19 +127,19 @@ app.post('/api/rooms/:roomId/celebrity', async (req, res) => {
       player.celebrity = celebrity;
     }
 
-    await db.collection('rooms').updateOne(
-      { roomCode: roomId },
-      { $set: { players: room.players } }
-    );
+    await db
+      .collection('rooms')
+      .updateOne({ roomCode: roomId }, { $set: { players: room.players } });
 
     // Check if all players have submitted
     const allSubmitted = room.players.every((p: Player) => p.hasSubmittedCelebrity);
     if (allSubmitted) {
-      const celebrities = room.players.map((p: Player) => p.celebrity!).sort(() => Math.random() - 0.5);
-      await db.collection('rooms').updateOne(
-        { roomCode: roomId },
-        { $set: { celebrities: celebrities } }
-      );
+      const celebrities = room.players
+        .map((p: Player) => p.celebrity!)
+        .sort(() => Math.random() - 0.5);
+      await db
+        .collection('rooms')
+        .updateOne({ roomCode: roomId }, { $set: { celebrities: celebrities } });
       io.to(roomId).emit('allCelebritiesSubmitted', celebrities);
     }
 

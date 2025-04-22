@@ -10,4 +10,4 @@ export interface Room {
   isGameStarted: boolean;
   players: Player[];
   celebrities: string[];
-} 
+}

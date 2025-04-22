@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -9,6 +10,7 @@ import {
   VStack,
   Text,
   useToast,
+  VisuallyHidden,
 } from '@chakra-ui/react';
 import axios from 'axios';
 
@@ -72,55 +74,72 @@ const Home = () => {
   };
 
   return (
-    <Container maxW="container.md" py={10}>
+    <Container maxW="container.md" py={10} role="main" aria-label="Celebrity Game Home">
       <VStack spacing={8} bg="white" p={8} borderRadius="xl" boxShadow="lg">
-        <Heading color="brand.accent2">Celebrity Game</Heading>
+        <Heading as="h1" color="brand.accent2">Celebrity Game</Heading>
         
-        <Input
-          placeholder="Enter moderator's name"
-          value={moderatorName}
-          onChange={(e) => setModeratorName(e.target.value)}
-          bg="white"
-          borderColor="brand.accent1"
-          _hover={{ borderColor: 'brand.accent3' }}
-        />
-        <Button
-          onClick={createRoom}
-          bg="brand.accent1"
-          color="white"
-          _hover={{ bg: 'brand.accent3' }}
-          w="full"
-        >
-          Create New Room
-        </Button>
+        <Box as="section" aria-label="Create New Room" w="full">
+          <VisuallyHidden as="h2">Create New Room as Moderator</VisuallyHidden>
+          <Input
+            placeholder="Enter moderator's name"
+            value={moderatorName}
+            onChange={(e) => setModeratorName(e.target.value)}
+            bg="white"
+            borderColor="brand.accent1"
+            _hover={{ borderColor: 'brand.accent3' }}
+            aria-label="Moderator name"
+            required
+          />
+          <Button
+            onClick={createRoom}
+            bg="brand.accent1"
+            color="white"
+            _hover={{ bg: 'brand.accent3' }}
+            w="full"
+            mt={4}
+            aria-label="Create new room as moderator"
+          >
+            Create New Room
+          </Button>
+        </Box>
 
-        <Text color="brand.accent2">- OR -</Text>
+        <Text color="brand.accent2" role="separator" aria-label="or">- OR -</Text>
 
-        <Input
-          placeholder="Enter player name"
-          value={playerName}
-          onChange={(e) => setPlayerName(e.target.value)}
-          bg="white"
-          borderColor="brand.accent1"
-          _hover={{ borderColor: 'brand.accent3' }}
-        />
-        <Input
-          placeholder="Enter room code"
-          value={roomCode}
-          onChange={(e) => setRoomCode(e.target.value)}
-          bg="white"
-          borderColor="brand.accent1"
-          _hover={{ borderColor: 'brand.accent3' }}
-        />
-        <Button
-          onClick={joinRoom}
-          bg="brand.accent2"
-          color="white"
-          _hover={{ bg: 'brand.accent3' }}
-          w="full"
-        >
-          Join Room
-        </Button>
+        <Box as="section" aria-label="Join Existing Room" w="full">
+          <VisuallyHidden as="h2">Join Existing Room as Player</VisuallyHidden>
+          <Input
+            placeholder="Enter player name"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            bg="white"
+            borderColor="brand.accent1"
+            _hover={{ borderColor: 'brand.accent3' }}
+            aria-label="Player name"
+            required
+          />
+          <Input
+            placeholder="Enter room code"
+            value={roomCode}
+            onChange={(e) => setRoomCode(e.target.value)}
+            bg="white"
+            borderColor="brand.accent1"
+            _hover={{ borderColor: 'brand.accent3' }}
+            mt={4}
+            aria-label="Room code"
+            required
+          />
+          <Button
+            onClick={joinRoom}
+            bg="brand.accent2"
+            color="white"
+            _hover={{ bg: 'brand.accent3' }}
+            w="full"
+            mt={4}
+            aria-label="Join existing room as player"
+          >
+            Join Room
+          </Button>
+        </Box>
 
         <Button
           onClick={openRules}
@@ -130,12 +149,25 @@ const Home = () => {
           w="auto"
           _hover={{ bg: 'brand.accent1' }}
           fontWeight="bold"
+          aria-label="Open game rules in new tab"
         >
           Game Rules
         </Button>
       </VStack>
     </Container>
   );
+};
+
+Home.propTypes = {
+  onCreateRoom: PropTypes.func,
+  onJoinRoom: PropTypes.func,
+  onOpenRules: PropTypes.func,
+};
+
+Home.defaultProps = {
+  onCreateRoom: () => {},
+  onJoinRoom: () => {},
+  onOpenRules: () => {},
 };
 
 export default Home; 

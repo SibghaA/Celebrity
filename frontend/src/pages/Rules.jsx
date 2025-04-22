@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -10,36 +11,35 @@ import {
   ListItem,
   OrderedList,
   Button,
+  VisuallyHidden,
 } from '@chakra-ui/react';
 
 const Rules = () => {
   const navigate = useNavigate();
 
-  const goToHome = () => {
-    navigate('/');
-  };
-
   return (
-    <Container maxW="container.md" py={10}>
+    <Container maxW="container.md" py={10} role="main" aria-label="Game Rules">
       <VStack spacing={8} bg="white" p={8} borderRadius="xl" boxShadow="lg" align="start">
-        <Heading color="brand.accent2" size="xl">Celebrity Guessing Game Rules</Heading>
+        <Heading as="h1" color="brand.accent2">Celebrity Guessing Game Rules</Heading>
         
-        <Box>
-          <OrderedList spacing={4}>
+        <Box as="section" aria-label="Game Rules">
+          <OrderedList spacing={4} role="list">
             <ListItem>
-              <Text fontWeight="bold">Secret Selection:</Text>
+              <Text fontWeight="bold" as="h2">Secret Selection:</Text>
               <Text>Each player secretly chooses a celebrity name without telling anyone.</Text>
             </ListItem>
             
             <ListItem>
-              <Text fontWeight="bold">Taking Turns:</Text>
+              <Text fontWeight="bold" as="h2">Taking Turns:</Text>
               <Text>Players take turns guessing which celebrity name belongs to which player.</Text>
               <Text>On your turn, you make one guess at a time.</Text>
-              <Text fontStyle="italic">Example: "I think Sarah chose Brad Pitt."</Text>
+              <Text fontStyle="italic" aria-label="Example: I think Sarah chose Brad Pitt">
+                Example: "I think Sarah chose Brad Pitt."
+              </Text>
             </ListItem>
             
             <ListItem>
-              <Text fontWeight="bold">Correct Guesses:</Text>
+              <Text fontWeight="bold" as="h2">Correct Guesses:</Text>
               <UnorderedList>
                 <ListItem>The correctly guessed player joins your team</ListItem>
                 <ListItem>You get to continue guessing until you make a wrong guess</ListItem>
@@ -47,7 +47,7 @@ const Rules = () => {
             </ListItem>
             
             <ListItem>
-              <Text fontWeight="bold">Winning Strategy:</Text>
+              <Text fontWeight="bold" as="h2">Winning Strategy:</Text>
               <Text>The goal is to avoid being guessed while correctly guessing others.</Text>
               <UnorderedList>
                 <ListItem>Choose a celebrity that others wouldn't easily associate with you</ListItem>
@@ -56,20 +56,28 @@ const Rules = () => {
             </ListItem>
             
             <ListItem>
-              <Text fontWeight="bold">Game End:</Text>
+              <Text fontWeight="bold" as="h2">Game End:</Text>
               <Text>The game ends when all but one player/team have not been guessed.</Text>
             </ListItem>
           </OrderedList>
         </Box>
 
-        <Text fontWeight="bold" fontStyle="italic" color="brand.accent2">
+        <Text 
+          fontWeight="bold" 
+          fontStyle="italic" 
+          color="brand.accent2"
+          role="note"
+          aria-label="Important reminder"
+        >
           Remember, pick challenging celebrities that aren't obvious matches to your personality or interests!
         </Text>
 
-        <Heading color="brand.accent2" size="lg" pt={4}>How to play the game</Heading>
-        
-        <Box>
-          <UnorderedList spacing={4}>
+        <Box as="section" aria-label="How to Play Instructions" w="full">
+          <Heading as="h2" color="brand.accent2" size="lg" pt={4}>
+            How to play the game
+          </Heading>
+          
+          <UnorderedList spacing={4} role="list">
             <ListItem>
               If you're the moderator, add your name and create a new room.
             </ListItem>
@@ -91,21 +99,29 @@ const Rules = () => {
           </UnorderedList>
         </Box>
 
-        <Box w="full" pt={6}>
-          <Button
-            onClick={goToHome}
-            bg="brand.accent1"
-            color="white"
-            _hover={{ bg: 'brand.accent3' }}
-            size="lg"
-            w="full"
-          >
-            Start Game
-          </Button>
-        </Box>
+        <Button
+          onClick={() => navigate('/')}
+          bg="brand.accent1"
+          color="white"
+          _hover={{ bg: 'brand.accent3' }}
+          size="lg"
+          w="full"
+          mt={4}
+          aria-label="Return to game home page"
+        >
+          Start Game
+        </Button>
       </VStack>
     </Container>
   );
+};
+
+Rules.propTypes = {
+  onStartGame: PropTypes.func,
+};
+
+Rules.defaultProps = {
+  onStartGame: () => {},
 };
 
 export default Rules; 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useParams, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -13,9 +14,18 @@ import {
   useToast,
   HStack,
   Icon,
+  VisuallyHidden,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import io from 'socket.io-client';
+
+// Define Player PropType shape
+const PlayerShape = PropTypes.shape({
+  username: PropTypes.string.isRequired,
+  isModerator: PropTypes.bool.isRequired,
+  hasSubmittedCelebrity: PropTypes.bool.isRequired,
+  celebrity: PropTypes.string,
+});
 
 const Room = () => {
   const { roomId } = useParams();
@@ -101,52 +111,69 @@ const Room = () => {
     }
   };
   
+  // Helper function to check if current user is moderator
+  const isModerator = players.find(p => p.username === username)?.isModerator;
+
   return (
-    <Container maxW="container.lg" py={10}>
+    <Container maxW="container.lg" py={10} role="main" aria-label="Game Room">
       <VStack spacing={6} bg="white" p={8} borderRadius="xl" boxShadow="lg">
-        <Heading color="brand.accent2">Room Code: {roomId}</Heading>
-        <Text fontSize="lg" color="brand.accent2">
+        <Heading as="h1" color="brand.accent2">
+          Room Code: <span aria-label={`Room code is ${roomId}`}>{roomId}</span>
+        </Heading>
+        
+        <Text fontSize="lg" color="brand.accent2" role="status">
           Welcome, {username}!
         </Text>
         
-        <List spacing={3} w="full">
-          <Heading size="md" color="brand.accent2" mb={2}>
+        <Box as="section" aria-label="Players List" w="full">
+          <Heading as="h2" size="md" color="brand.accent2" mb={2}>
             Players:
           </Heading>
-          {players.map((player, index) => (
-            <ListItem
-              key={index}
-              p={3}
-              bg="#f6bd60"
-              borderRadius="md"
-              color="white"
-            >
-              <HStack justify="space-between">
-                <Text>
-                  {player.username} {player.isModerator && "(Moderator)"}
-                </Text>
-                {player.hasSubmittedCelebrity && (
-                  <Text fontSize="lg" color="green.500">✓</Text>
-                )}
-              </HStack>
-            </ListItem>
-          ))}
-        </List>
+          <List spacing={3} w="full" role="list">
+            {players.map((player, index) => (
+              <ListItem
+                key={index}
+                p={3}
+                bg="white"
+                borderRadius="md"
+                border="1px"
+                borderColor="gray.200"
+                role="listitem"
+                aria-label={`${player.username}${player.isModerator ? ', Moderator' : ''}${player.hasSubmittedCelebrity ? ', has submitted celebrity' : ', has not submitted celebrity'}`}
+              >
+                <HStack justify="space-between">
+                  <Text>
+                    {player.username} {player.isModerator && (
+                      <span aria-label="Moderator">(Moderator)</span>
+                    )}
+                  </Text>
+                  {player.hasSubmittedCelebrity && (
+                    <>
+                      <Text fontSize="lg" color="green.500" aria-hidden="true">✓</Text>
+                      <VisuallyHidden>Has submitted celebrity</VisuallyHidden>
+                    </>
+                  )}
+                </HStack>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
 
-        {!gameStarted && players.some(p => p.isModerator) && (
+        {!gameStarted && isModerator && (
           <Button
             onClick={startGame}
             bg="brand.accent1"
             color="white"
             _hover={{ bg: 'brand.accent3' }}
             w="full"
+            aria-label="Start the game"
           >
             Start Game
           </Button>
         )}
 
         {gameStarted && !players.find(p => p.username === username)?.hasSubmittedCelebrity && (
-          <VStack w="full" spacing={4}>
+          <VStack w="full" spacing={4} as="form" role="form" aria-label="Submit celebrity form">
             <Input
               placeholder="Enter a celebrity name"
               value={celebrity}
@@ -154,6 +181,8 @@ const Room = () => {
               bg="white"
               borderColor="brand.accent1"
               _hover={{ borderColor: 'brand.accent3' }}
+              aria-label="Enter celebrity name"
+              required
             />
             <Button
               onClick={submitCelebrity}
@@ -161,18 +190,19 @@ const Room = () => {
               color="white"
               _hover={{ bg: 'brand.accent3' }}
               w="full"
+              aria-label="Submit celebrity name"
             >
               Submit Celebrity
             </Button>
           </VStack>
         )}
 
-        {celebrities.length > 0 && (
-          <VStack w="full" spacing={4}>
-            <Heading size="md" color="brand.accent2">
+        {celebrities.length > 0 && isModerator && (
+          <Box as="section" aria-label="Celebrities List" w="full">
+            <Heading as="h2" size="md" color="brand.accent2">
               Celebrities to Guess:
             </Heading>
-            <List spacing={3} w="full">
+            <List spacing={3} w="full" role="list">
               {celebrities.map((celeb, index) => (
                 <ListItem
                   key={index}
@@ -181,16 +211,45 @@ const Room = () => {
                   borderRadius="md"
                   border="1px"
                   borderColor="gray.200"
+                  role="listitem"
+                  aria-label={`Celebrity ${index + 1}: ${celeb}`}
                 >
                   {celeb}
                 </ListItem>
               ))}
             </List>
-          </VStack>
+          </Box>
+        )}
+
+        {celebrities.length > 0 && !isModerator && (
+          <Text 
+            color="brand.accent2" 
+            fontStyle="italic"
+            role="status"
+            aria-live="polite"
+          >
+            All celebrities have been submitted. The moderator will share the list with everyone.
+          </Text>
         )}
       </VStack>
     </Container>
   );
+};
+
+Room.propTypes = {
+  players: PropTypes.arrayOf(PlayerShape),
+  celebrities: PropTypes.arrayOf(PropTypes.string),
+  gameStarted: PropTypes.bool,
+  username: PropTypes.string,
+  roomId: PropTypes.string,
+};
+
+Room.defaultProps = {
+  players: [],
+  celebrities: [],
+  gameStarted: false,
+  username: '',
+  roomId: '',
 };
 
 export default Room; 
